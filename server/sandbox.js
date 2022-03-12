@@ -1,21 +1,34 @@
-/* eslint-disable no-console, no-process-exit */
 const dedicatedbrand = require('./sources/dedicatedbrand');
+var fs = require('fs');
 
-async function sandbox (eshop = 'https://www.dedicatedbrand.com/en/men/news') {
+async function sandbox () {
   try {
-    console.log(`🕵️‍♀️  browsing ${eshop} source`);
+    var products = [];
+    let websites = [];
+    websites.push('https://www.dedicatedbrand.com/en/men/news');
+    websites.push('https://www.montlimart.com/polos-t-shirts.html');
+    websites.push('https://adresse.paris/608-pulls-et-sweatshirts');
 
-    const products = await dedicatedbrand.scrape(eshop);
-
-    console.log(products);
+    
+    for(let eshop in websites){
+      console.log(`🕵️‍♀️  browsing ${websites[eshop]} source`);
+      
+      let currentProducts = await dedicatedbrand.scrape(websites[eshop]);
+      for(let i in currentProducts){
+        products.push(currentProducts[i]);
+      }
+    }  
+    fs.writeFileSync('products.json', JSON.stringify(products), 'utf8');
     console.log('done');
     process.exit(0);
+   
+   
+
   } catch (e) {
     console.error(e);
     process.exit(1);
   }
 }
 
-const [,, eshop] = process.argv;
-
-sandbox(eshop);
+const [,,] = process.argv;
+sandbox();
