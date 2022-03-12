@@ -4,10 +4,10 @@ const fs = require('fs');
 
 const MONGODB_DB_NAME = 'clearfashion';
 const MONGODB_COLLECTION = 'products';
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = "mongodb+srv://Mathis:Tictac64@cluster0.eo0ip.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 
-let client = null;
-let database = null;
+let client = await MongoClient.connect(MONGODB_URI, {'useNewUrlParser': true});
+const db =  client.db(MONGODB_DB_NAME)
 
 /**
  * Get db connection
@@ -32,11 +32,12 @@ const getDB = module.exports.getDB = async () => {
   }
 };
 
-/**
- * Insert list of products
- * @param  {Array}  products
- * @return {Object}
- */
+//Insert list of products
+const collection = db.collection('products');
+const result = collection.insertMany(products);
+
+console.log(result);
+ 
 module.exports.insert = async products => {
   try {
     const db = await getDB();
@@ -72,6 +73,45 @@ module.exports.find = async query => {
     return null;
   }
 };
+
+// Trouve les noms des marques 
+const findBrand = module.exports.findBrand = async brand => {
+  try{
+    const query = {brand}
+    const res = await this.find(query);
+    return res;
+  }catch(err){
+    console.log("🚨 findBrand error :",err);
+    process.exit(1);
+  }
+}
+
+// Trouve les prix moins par rapport (2eme query)
+//const query = {brand : brand, price : {$lte:price}}
+const findPrice = module.exports.findPrice = async brand => {
+  try{
+    const query = {brand : brand, price : {$lte:price}}
+    const res = await this.find(query);
+    return res;
+  }catch(err){
+    console.log("🚨 findPrice error :",err);
+    process.exit(1);
+  }
+}
+
+// 3eme query - Sorted 
+const findPriceSorted = module.exports.findPriceSorted = async brand => {
+  try{
+    const query = {brand : brand, price : {$lte:price}}
+    const res = await this.find(query);
+    return res.sort();
+  }catch(err){
+    console.log("🚨 findPriceSorted error :",err);
+    process.exit(1);
+  }
+}
+
+
 
 /**
  * Close the connection
