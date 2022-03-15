@@ -2,12 +2,12 @@ require('dotenv').config();
 const {MongoClient} = require('mongodb');
 const fs = require('fs');
 
-const MONGODB_DB_NAME = 'clearfashion';
+const MONGODB_DB_NAME = 'cluster0';
 const MONGODB_COLLECTION = 'products';
 const MONGODB_URI = "mongodb+srv://Mathis:Tictac64@cluster0.eo0ip.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 
-let client = await MongoClient.connect(MONGODB_URI, {'useNewUrlParser': true});
-const db =  client.db(MONGODB_DB_NAME)
+let client = null
+let database =  null
 
 /**
  * Get db connection
@@ -33,10 +33,10 @@ const getDB = module.exports.getDB = async () => {
 };
 
 //Insert list of products
-const collection = db.collection('products');
-const result = collection.insertMany(products);
+//const collection = db.collection('products');
+//const result = collection.insertMany(products);
 
-console.log(result);
+//console.log(result);
  
 module.exports.insert = async products => {
   try {
@@ -110,6 +110,60 @@ const findPriceSorted = module.exports.findPriceSorted = async brand => {
     process.exit(1);
   }
 }
+
+
+
+const findId=module.exports.findId =async id =>{
+  try{
+    const query ={_id : id};
+    const res =await this.find(query);
+    return res;
+  }
+  catch(error){
+    console.error('Find Id error...',error);
+    return null;
+  }
+};
+
+
+
+
+
+const Search = module.exports.Search = async queries =>{
+  try{
+
+    const db = await getDB();
+    const collection = db.collection(MONGODB_COLLECTION);
+    let query ={};
+    let limit =12;
+    console.log(queries)
+    for(const[key,val] of Object.entries(queries)){
+      switch(key){
+        case "brand":
+          query["brand"]=val;
+          break;
+        case "price":
+          query["price"]={$lte:parseInt(val)};
+          break;
+        case "limit":
+          limit=val;
+          break;
+        default:
+          break;
+
+      }
+    }
+    var mysort={price:'asc'};
+    const res =await collection.find(query).sort(mysort).limit(parseInt(limit)).toArray();
+    return res;
+  }
+  catch(error){
+    console.error('Find Sorted Price error...',error);
+    return null;
+  }
+};
+
+
 
 
 
